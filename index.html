@@ -197,7 +197,7 @@ canvas{
 /* ===== QUICK VIEW ===== */
 .quick-box{
   position:fixed;
-  right:20px;
+  right:100px;
   top:140px; /* 🔥 ระดับเดียวกับ bead */
   width:160px;
   backdrop-filter: blur(10px);
@@ -419,6 +419,54 @@ html, body{
 .bet-bar.slow-blink {
   animation: slowBlink 3.5s ease-in-out infinite;
 }
+
+.mini-bead-card{
+
+    margin-top:10px;
+
+    width:260px;
+
+    margin-left:-115px;      /* ← เลื่อนไปทางซ้าย */
+
+    padding:10px;
+
+    border-radius:14px;
+
+    background:linear-gradient(145deg,#1e293b,#334155);
+
+    box-shadow:0 5px 15px rgba(0,0,0,.4);
+
+}
+
+.mini-header{
+
+    display:flex;
+
+    justify-content:space-between;
+
+    font-size:10px;
+
+    font-weight:bold;
+
+    margin-bottom:6px;
+
+}
+
+#miniBead{
+
+    width:242px;
+
+    height:132px;
+
+    background:#fff;
+
+    border-radius:10px;
+
+    display:block;
+
+    margin:auto;
+
+}
 </style>
 </head>
 
@@ -500,8 +548,24 @@ font-weight:bold;
 </div>
 
 <div id="quickView" class="quick-box glass">
-  <div class="quick-title">TOP 1</div>
-  <div id="quickList"></div>
+
+    <div class="quick-title">TOP 1</div>
+
+    <div id="quickList"></div>
+
+    <!-- ===== เพิ่มตรงนี้ ===== -->
+    <div class="mini-bead-card">
+
+        <div id="miniHeader" class="mini-header"></div>
+
+        <canvas
+    id="miniBead"
+    width="242"
+    height="132">
+</canvas>
+
+    </div>
+
 </div>
 
 
@@ -830,10 +894,17 @@ return {
 const beadCanvas=document.getElementById("bead");
 
 function draw(){
+
   drawBead();
+
+  drawMiniBead();   // ← เพิ่มบรรทัดนี้
+
   renderSystems();
-  renderQuickView(); // ✅ เพิ่มตรงนี้
+
+  renderQuickView();
+
   updateTop();
+
 }
 
 
@@ -850,6 +921,67 @@ function drawBead(){
   ctx.fillStyle="#fff";ctx.font=`bold ${FONT}px Arial`;
   ctx.textAlign="center";ctx.textBaseline="middle";ctx.fillText(v,x,y);
  });
+}
+
+function drawMiniBead(){
+
+    const cv=document.getElementById("miniBead");
+
+    if(!cv) return;
+
+    const ctx=cv.getContext("2d");
+
+    ctx.clearRect(0,0,999,999);
+
+const cell=22;
+const rows=6;
+const cols=11;
+const start=Math.max(0,bead.length-(rows*cols));
+
+    const data=bead.slice(start);
+
+    let p=0,b=0,t=0;
+
+    data.forEach(x=>{
+        if(x==="P")p++;
+        if(x==="B")b++;
+        if(x==="T")t++;
+    });
+
+    document.getElementById("miniHeader").innerHTML=
+    `
+    <span style="color:#3b82f6">P${p}</span>
+    <span style="color:#ef4444">B${b}</span>
+    <span style="color:#22c55e">T${t}</span>
+    <span>=${data.length}</span>
+    `;
+
+    data.forEach((v,i)=>{
+
+        const r=i%rows;
+
+        const c=Math.floor(i/rows);
+
+        if(c>=cols)return;
+
+       const x=11+c*cell;
+       const y=11+r*cell;
+
+        ctx.beginPath();
+
+       ctx.arc(x,y,8,0,Math.PI*2);
+
+        ctx.fillStyle=
+            v==="P"
+            ?"#3b82f6"
+            :v==="B"
+            ?"#ef4444"
+            :"#22c55e";
+
+        ctx.fill();
+
+    });
+
 }
 
 function renderSystems(){
